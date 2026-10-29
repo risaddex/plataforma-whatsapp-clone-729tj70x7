@@ -81,7 +81,7 @@ export default function Inbox() {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const timerIntervalRef = useRef<number | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const isFirstLoadRef = useRef(true)
@@ -904,7 +904,10 @@ export default function Inbox() {
                             <Loader2 className="h-3 w-3 text-zinc-400 animate-spin" />
                           )}
                           {msg.status === 'failed' && (
-                            <AlertCircle className="h-3 w-3 text-red-500" title="Falha ao enviar" />
+                            <AlertCircle
+                              className="h-3 w-3 text-red-500"
+                              aria-label="Falha ao enviar"
+                            />
                           )}
                         </div>
                       </div>

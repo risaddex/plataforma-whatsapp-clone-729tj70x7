@@ -14,7 +14,7 @@ import Pipeline from './pages/Pipeline'
 import NotFound from './pages/NotFound'
 
 const App = () => (
-  <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
+  <BrowserRouter>
     <TooltipProvider>
       <Toaster />
       <Sonner />

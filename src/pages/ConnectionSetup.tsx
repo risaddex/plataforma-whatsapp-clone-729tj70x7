@@ -21,6 +21,7 @@ export default function ConnectionSetup() {
   const [instance, setInstance] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
+  const [qrError, setQrError] = useState('')
   const autoQrTriggered = useRef(false)
   const { user } = useAuth()
   const { toast } = useToast()
@@ -30,6 +31,7 @@ export default function ConnectionSetup() {
       const instances = await getInstances()
       if (instances.length > 0) {
         setInstance(instances[0])
+        if (instances[0].qrcode) setQrError('')
       } else {
         setInstance(null)
       }
@@ -60,8 +62,10 @@ export default function ConnectionSetup() {
   const handleConnect = async (silent = false) => {
     if (!instance) return
     setActionLoading(true)
+    setQrError('')
     try {
       await fetchInstanceQR(instance.id)
+      await loadInstance()
       if (!silent) {
         toast({
           title: 'QR Code solicitado',
@@ -69,11 +73,15 @@ export default function ConnectionSetup() {
         })
       }
     } catch (e: any) {
-      toast({
-        title: 'Erro ao gerar QR Code',
-        description: e.message || 'Erro na Evolution API',
-        variant: 'destructive',
-      })
+      const message = e?.message || 'Erro na Evolution API'
+      setQrError(message)
+      if (!silent) {
+        toast({
+          title: 'Erro ao gerar QR Code',
+          description: message,
+          variant: 'destructive',
+        })
+      }
     } finally {
       setActionLoading(false)
     }
@@ -255,7 +263,14 @@ export default function ConnectionSetup() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center w-full space-y-6 animate-in fade-in duration-500">
-                      {instance.qrcode ? (
+                      {qrError ? (
+                        <div className="w-52 bg-rose-50/60 rounded-2xl border border-rose-200 flex flex-col items-center justify-center text-center p-4 space-y-2">
+                          <QrCode className="h-8 w-8 text-rose-500 opacity-70" strokeWidth={1.5} />
+                          <span className="text-xs font-medium text-rose-700 leading-relaxed">
+                            {qrError}
+                          </span>
+                        </div>
+                      ) : instance.qrcode ? (
                         <div className="relative group">
                           <div className="absolute -inset-4 rounded-3xl bg-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                           <div className="relative p-4 bg-white rounded-2xl shadow-sm border border-slate-100 ring-1 ring-slate-900/5">
@@ -329,7 +344,9 @@ export default function ConnectionSetup() {
                   {instance.status !== 'connected' && (
                     <Button
                       onClick={() => handleConnect()}
-                      disabled={actionLoading || instance.status === 'connecting'}
+                      disabled={
+                        actionLoading || (instance.status === 'connecting' && !!instance.qrcode)
+                      }
                       className="w-full sm:w-auto bg-violet-600 hover:bg-violet-700 text-white shadow-sm font-medium px-5 text-sm h-9"
                     >
                       {actionLoading || instance.status === 'connecting' ? (

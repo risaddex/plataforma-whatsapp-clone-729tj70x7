@@ -37,10 +37,10 @@ import { Button } from '@/components/ui/button'
 const formSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().optional(),
-  provider: z.enum(['gemini', 'openai'], { required_error: 'Provedor é obrigatório' }),
+  provider: z.enum(['gemini', 'openai'], { message: 'Provedor é obrigatório' }),
   api_key: z.string().min(1, 'Chave da API é obrigatória'),
   system_prompt: z.string().min(1, 'Prompt do sistema é obrigatório'),
-  active: z.boolean().default(true),
+  active: z.boolean(),
 })
 
 type AgentFormValues = z.infer<typeof formSchema>
